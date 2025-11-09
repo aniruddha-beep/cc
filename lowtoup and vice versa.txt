@@ -1,0 +1,27 @@
+//gedit case_convert.l
+
+%{
+#include <stdio.h>
+#include <ctype.h>
+%}
+
+%%
+[A-Z]     { printf("%c", tolower(yytext[0])); }   // Convert uppercase → lowercase
+[a-z]     { printf("%c", toupper(yytext[0])); }   // Convert lowercase → uppercase
+.|\n      { printf("%c", yytext[0]); }            // Print other characters as-is
+%%
+
+int main() {
+    printf("Enter a string: ");
+    yylex();   // Start scanning user input
+    printf("\n");
+    return 0;
+}
+
+int yywrap() { return 1; }
+
+//save n close
+
+//flex case_convert.l
+//gcc lex.yy.c -o case_convert -lfl
+//./case_convert

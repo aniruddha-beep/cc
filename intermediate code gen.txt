@@ -1,0 +1,96 @@
+//gedit icg.y
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int temp_count = 1;
+char temp[10];
+
+void newTemp(char *str) {
+    sprintf(str, "t%d", temp_count++);
+}
+
+void yyerror(const char *s);
+int yylex(void);
+%}
+
+%token ID NUMBER
+%left '+' '-'
+%left '*' '/'
+
+%%
+
+S : ID '=' E { printf("%s = %s\n", $1, $3); }
+  ;
+
+E : E '+' E { 
+        char t[10]; newTemp(t);
+        printf("%s = %s + %s\n", t, $1, $3);
+        strcpy($$, t);
+    }
+  | E '-' E {
+        char t[10]; newTemp(t);
+        printf("%s = %s - %s\n", t, $1, $3);
+        strcpy($$, t);
+    }
+  | E '*' E {
+        char t[10]; newTemp(t);
+        printf("%s = %s * %s\n", t, $1, $3);
+        strcpy($$, t);
+    }
+  | E '/' E {
+        char t[10]; newTemp(t);
+        printf("%s = %s / %s\n", t, $1, $3);
+        strcpy($$, t);
+    }
+  | '(' E ')' { strcpy($$, $2); }
+  | ID         { strcpy($$, $1); }
+  | NUMBER     { strcpy($$, $1); }
+  ;
+
+%%
+
+void yyerror(const char *s) {
+    printf("❌ Invalid Expression!\n");
+}
+
+int main() {
+    printf("Enter an arithmetic expression (ex: a=b+c*d):\n");
+    yyparse();
+    return 0;
+}
+//save n close
+
+
+
+//gedit icg.l
+%{
+#include "y.tab.h"
+#include <string.h>
+%}
+
+%%
+
+[a-zA-Z][a-zA-Z0-9]*    { yylval = strdup(yytext); return ID; }
+[0-9]+                  { yylval = strdup(yytext); return NUMBER; }
+"="                     { return '='; }
+"("                     { return '('; }
+")"                     { return ')'; }
+"+"                     { return '+'; }
+"-"                     { return '-'; }
+"*"                     { return '*'; }
+"/"                     { return '/'; }
+
+[ \t\n]+                ; // ignore spaces
+
+.                       { printf("Invalid character: %s\n", yytext); }
+
+%%
+
+int yywrap(void) { return 1; }
+//save n close
+//yacc -d icg.y
+//lex icg.l
+//gcc lex.yy.c y.tab.c -o icg -ll -ly
+//./icg

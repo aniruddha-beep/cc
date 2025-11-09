@@ -1,0 +1,26 @@
+//gedit test_com.l
+
+%{
+#include <stdio.h>
+#include <string.h>
+%}
+
+%%
+.*com$    { printf("✅ The line ends with 'com'.\n"); }
+.*        { printf("❌ The line does NOT end with 'com'.\n"); }
+%%
+
+int main() {
+    printf("Enter a line: ");
+    yylex();
+    return 0;
+}
+
+int yywrap() {
+    return 1;
+}
+//ctrl+s and ctrl+c
+
+//flex test_com.l
+//gcc lex.yy.c -o test_com -lfl
+//./test_com

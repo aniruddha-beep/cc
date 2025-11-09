@@ -1,0 +1,40 @@
+//gedit count_a_terminal.l
+
+
+%{
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int count = 0;
+%}
+
+%%
+
+([Aa][A-Za-z0-9_]*)     { count++; }       // Word starts with A or a
+[A-Za-z0-9_]+            ;                 // Any other word (ignore)
+[ \t\n]+                 ;                 // Ignore spaces/tabs/newlines
+.                        ;                 // Ignore other characters
+
+%%
+
+int main() {
+    printf("Enter a sentence: ");
+    yylex();     // Start scanning input
+    printf("Words starting with 'A' or 'a': %d\n", count);
+    return 0;
+}
+
+int yywrap() {
+    return 1;
+}
+
+
+//save n close
+
+//flex count_a_terminal.l
+//gcc lex.yy.c -o count_a_terminal -lfl
+//./count_a_terminal
+
+
+

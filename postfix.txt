@@ -1,0 +1,55 @@
+//gedit postfix.y
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%token NUMBER
+
+%%
+
+S : E '\n'     { printf("Result = %d\n", $1); }
+  ;
+
+E : E E '+'    { $$ = $1 + $2; }
+  | E E '-'    { $$ = $1 - $2; }
+  | E E '*'    { $$ = $1 * $2; }
+  | E E '/'    { $$ = $1 / $2; }
+  | NUMBER     { $$ = $1; }
+  ;
+
+%%
+
+int yyerror(char *s) {
+    printf("Error: %s\n", s);
+    return 0;
+}
+
+int main() {
+    printf("Enter a postfix expression: ");
+    yyparse();
+    return 0;
+}
+
+//save n close
+
+
+//gedit postfix.l
+%{
+#include "y.tab.h"
+%}
+
+%%
+
+[0-9]+      { yylval = atoi(yytext); return NUMBER; }
+[\n]        { return '\n'; }
+[+\-*/]     { return yytext[0]; }
+[ \t]       { /* ignore spaces and tabs */ }
+.           { /* ignore invalid chars */ }
+
+%%
+//save and close
+//yacc -d postfix.y
+//lex postfix.l
+//gcc lex.yy.c y.tab.c -o postfix_eval -ll -ly
+//./postfix_eval

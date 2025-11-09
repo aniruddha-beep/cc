@@ -1,0 +1,106 @@
+//gedit deskcalc.y
+%{
+#include <stdio.h>
+#include <stdlib.h>
+
+/* yylval carries numeric values from lexer to parser */
+extern double yylval;
+
+void yyerror(const char *s);
+int yylex(void);
+%}
+
+%union {
+    double d;
+}
+
+%token <d> NUMBER
+%token QUIT
+
+%left '+' '-'
+%left '*' '/'
+%right UMINUS
+
+%%
+
+lines:
+      /* empty */
+    | lines line
+    ;
+
+line:
+      '\n'
+    | expr '\n'          { printf("= %g\n", $1); }
+    | QUIT '\n'          { printf("Bye!\n"); exit(0); }
+    | error '\n'         { yyerror("Syntax error — recovered at end of line"); yyerrok; }
+    ;
+
+expr:
+      expr '+' expr     { $$ = $1 + $3; }
+    | expr '-' expr     { $$ = $1 - $3; }
+    | expr '*' expr     { $$ = $1 * $3; }
+    | expr '/' expr     {
+                           if ($3 == 0.0) {
+                               yyerror("Division by zero");
+                               $$ = 0; /* arbitrary recovery value */
+                           } else $$ = $1 / $3;
+                         }
+    | '-' expr  %prec UMINUS  { $$ = - $2; }
+    | '(' expr ')'       { $$ = $2; }
+    | NUMBER             { $$ = $1; }
+    | '(' error ')'      { yyerror("Syntax error inside parenthesis — using 0"); yyerrok; $$ = 0; }
+    ;
+
+%%
+
+void yyerror(const char *s) {
+    fprintf(stderr, "Error: %s\n", s);
+}
+
+int main(void) {
+    printf("Desk Calculator (type expression then Enter). Type 'quit' or 'q' to exit.\n");
+    yyparse();
+    return 0;
+}
+//save n close
+
+
+//gedit deskcalc.l
+%{
+#include "y.tab.h"
+#include <stdlib.h>
+%}
+
+digit   [0-9]
+number  {digit}+(\.{digit}+)?([eE][+-]?{digit}+)?
+
+%%
+
+[ \t]+                  ;   /* ignore spaces and tabs */
+
+{number}                {
+                            yylval = atof(yytext);
+                            return NUMBER;
+                        }
+
+"quit"|"q"              { return QUIT; }
+
+\n                      { return '\n'; }
+
+"+"                     { return '+'; }
+"-"                     { return '-'; }
+"*"                     { return '*'; }
+"/"                     { return '/'; }
+"("                     { return '('; }
+")"                     { return ')'; }
+
+.                       { /* other single chars: return as-is so parser may handle or produce error */ return yytext[0]; }
+
+%%
+
+int yywrap() { return 1; }
+//save n close
+//yacc -d deskcalc.y          # produces y.tab.c and y.tab.h
+//lex deskcalc.l              # produces lex.yy.c
+//gcc y.tab.c lex.yy.c -o deskcalc -lm -ll -ly
+//./deskcalc

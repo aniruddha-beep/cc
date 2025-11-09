@@ -1,0 +1,32 @@
+//gedit dec_to_hex_terminal.l
+
+%{
+#include <stdio.h>
+#include <stdlib.h>
+%}
+
+%%
+
+[0-9]+      {
+                int num = atoi(yytext);      // Convert string to integer
+                printf("Hexadecimal value: %X\n", num);
+             }
+
+.|\n         { /* Ignore anything else */ }
+
+%%
+
+int main() {
+    printf("Enter a decimal number: ");
+    yylex();   // Start scanning user input
+    return 0;
+}
+
+int yywrap() {
+    return 1;
+}
+
+//save n close
+//flex dec_to_hex_terminal.l
+//gcc lex.yy.c -o dec_to_hex_terminal -lfl
+//./dec_to_hex_terminal

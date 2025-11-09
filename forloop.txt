@@ -1,0 +1,79 @@
+//gedit forloop.y
+//
+%{
+#include <stdio.h>
+#include "exp9.tab.h"
+%}
+
+%%
+"for"           { return FOR; }
+"("             { return LPARSEN; }
+")"             { return RPARSEN; }
+"{"             { return LBRACE; }
+"}"             { return RBRACE; }
+";"             { return SEMICOLON; }
+"="             { return ASSIGN; }
+"<"             { return LT; }
+">"             { return GT; }
+"+"             { return PLUS; }
+
+[a-zA-Z][a-zA-Z0-9]*   { return IDENTIFIER; }
+[0-9]+                 { return NUMBER; }
+
+[ \t\n]+               ; // Skip whitespace
+
+.                      { printf("Invalid character: %s\n", yytext); }
+%%
+
+int yywrap(void) {
+    return 1;
+}
+//save n close
+
+
+
+
+//gedit forloop.y
+%{
+#include <stdio.h>
+#include <stdlib.h>
+
+void yyerror(const char *s);
+int yylex(void);
+%}
+
+%token FOR IDENTIFIER NUMBER ASSIGN LT GT PLUS SEMICOLON
+%token LPARSEN RPARSEN LBRACE RBRACE
+
+%%
+
+S : FOR LPARSEN E SEMICOLON C SEMICOLON I RPARSEN LBRACE RBRACE
+      { printf("✅ Valid FOR loop syntax!\n"); }
+  ;
+
+E : IDENTIFIER ASSIGN NUMBER
+  ;
+
+C : IDENTIFIER LT NUMBER
+  | IDENTIFIER GT NUMBER
+  ;
+
+I : IDENTIFIER PLUS PLUS
+  ;
+
+%%
+
+void yyerror(const char *s) {
+    printf("❌ Invalid FOR loop syntax!\n");
+}
+
+int main() {
+    printf("Enter a FOR loop statement:\n");
+    yyparse();
+    return 0;
+}
+//save n close
+//yacc -d exp9.y
+//lex exp9.l
+//gcc lex.yy.c y.tab.c -o exp9 -ll -ly
+//./forloop
