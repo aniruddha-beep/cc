@@ -2,25 +2,41 @@
 
 %{
 #include <stdio.h>
-#include <ctype.h>
+
+/* Manual case conversion without using ctype.h */
+char convert(char c) {
+    if (c >= 'a' && c <= 'z') {
+        c = c - 32;  // lowercase → uppercase
+    } else if (c >= 'A' && c <= 'Z') {
+        c = c + 32;  // uppercase → lowercase
+    }
+    return c;
+}
 %}
 
 %%
-[A-Z]     { printf("%c", tolower(yytext[0])); }   // Convert uppercase → lowercase
-[a-z]     { printf("%c", toupper(yytext[0])); }   // Convert lowercase → uppercase
-.|\n      { printf("%c", yytext[0]); }            // Print other characters as-is
+
+.|\n    {
+            char ch;
+            ch = yytext[0];          /* Take the character from input */
+            ch = convert(ch);         /* Call our convert() function */
+            printf("%c", ch);         /* Print converted character */
+        }
+
 %%
 
 int main() {
     printf("Enter a string: ");
-    yylex();   // Start scanning user input
+    yylex();     // Start scanning user input
     printf("\n");
     return 0;
 }
 
-int yywrap() { return 1; }
+int yywrap() {
+    return 1;
+}
 
-//save n close
+//save and close
 
 //flex case_convert.l
 //gcc lex.yy.c -o case_convert -lfl
