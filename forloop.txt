@@ -1,4 +1,4 @@
-//gedit forloop.y
+//gedit forloop.l
 //
 %{
 #include <stdio.h>
@@ -77,3 +77,4 @@ int main() {
 //lex exp9.l
 //gcc lex.yy.c y.tab.c -o exp9 -ll -ly
 //./forloop
+
